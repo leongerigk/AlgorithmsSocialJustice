@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+#Julian Savage
+#References:
+#https://stackoverflow.com/questions/61838700/query-on-how-to-make-world-heat-map-using-ggplot-in-r
+#How to make heat map in R: https://rpubs.com/lumumba99/1026665
+
+library(dplyr)
+library(maps)
+library(ggplot2)
+
+df <- read.csv("violence_data.csv")
+df <- na.omit(df)
+
+# Calculate total value for each country
+total_values <- df %>% 
+  group_by(Country) %>% 
+  summarise(TotalValue = sum(Value))
+
+# Calculate number of rows for each country
+row_counts <- df %>% 
+  group_by(Country) %>% 
+  summarise(RowCount = n())
+
+# Merge the total values and row counts based on the 'Country' column
+result_df <- merge(total_values, row_counts, by = 'Country')
+
+# Calculate the average value for each country
+result_df$AverageValue <- (result_df$TotalValue / result_df$RowCount)
+print(result_df)
+
+world_map <- map_data("world") 
+world_map <- subset(world_map, region != "Antarctica") #exclude Antarctica
+
+ggplot(result_df) +
+  geom_map(
+    dat = world_map, map = world_map, aes(map_id = region),
+    fill = "white", color = "black", size = 0.25
+  ) +
+  geom_map(map = world_map, aes(map_id = result_df$Country, fill = result_df$AverageValue), size = 0.25) +
+  scale_fill_gradient(low = "green", high = "red", name = "Rankings") +
+  expand_limits(x = world_map$long, y = world_map$lat) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 20, face = "bold", lineheight = 1),
+    plot.subtitle = element_text(hjust = 0.5, size = 16, margin = margin(b = 20)),
+  ) +
+  labs(
+    title = "Average Score",
+    subtitle = "Countries from Dataset"
+  )
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
