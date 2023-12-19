@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask App with Plots</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Analyzing "Violence Against Woman" database</h1>
+    <url>https://www.kaggle.com/datasets/andrewmvd/violence-against-women-and-girls/</url>
+    <form method="GET">
+        <p><br></p>
+
+        <label for="question">Select a Question:</label>
+        <select id="question" name="question">
+            {% for question in questions %}
+                <option value="{{ question }}" {% if selected_question == question %}selected{% endif %}>{{ question }}</option>
+            {% endfor %}    
+        </select>
+        <label for="country">Select a country:</label>
+        <select id="country" name="country">
+            {% for country in countries %}
+                <option value="{{ country }}" {% if selected_country == country %}selected{% endif %}>{{ country }}</option>
+            {% endfor %}    
+        </select>
+        <div>
+            <label>Select gender:</label>
+            <input type="radio" name="gender" value="All" {% if selected_gender == 'All' %}checked{% endif %}> All
+            <input type="radio" name="gender" value="M" {% if selected_gender == "M" %}checked{% endif %}> Male
+            <input type="radio" name="gender" value="F" {% if selected_gender == "F" %}checked{% endif %}> Female
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for plot in plots %}
+            <div style="width: 33%;">
+                {{ plot|safe }}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
